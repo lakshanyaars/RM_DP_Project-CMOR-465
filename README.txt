@@ -1,45 +1,116 @@
-Single-Leg Revenue Management Dynamic Programming Tool
--------------------------------------------------------
+Revenue Management Dynamic Programming Tool
 
-Author: Lakshanyaa Rajkumar Sudhakar
-Course: Revenue Management
-Instructor: Dr. Darius
+Single-Leg Airline Revenue Management Model
 
-Project Description
--------------------
-This tool implements a single-leg (single-resource) revenue management 
-model using dynamic programming. The program computes the optimal value 
-function and bid prices for capacity control decisions under stochastic 
-demand.
+Overview
 
-The model follows the Bellman recursion framework discussed in lecture 
-(slides on single-resource dynamic programming and bid prices).
+This project implements a discrete-time, single-leg revenue management model using backward dynamic programming.
+
+The tool computes:
+
+The value function V(t,x)
+Bid prices (marginal seat values)
+Optimal accept/reject decisions
+Visualizations of pricing dynamics
+Forward Monte Carlo simulation validation
+
+The objective is to determine the optimal booking control policy under stochastic demand and limited capacity.
+
+Model Description
+State Variables
+x — remaining capacity (seats)
+t — remaining time periods until departure
+Decision Rule
+
+When a booking request arrives:
+
+Accept the request if:
+
+fare ≥ bid price
+
+Reject otherwise.
+
+Bellman Recursion
+
+The value function satisfies:
+
+V(t,x)=E[max{f
+j
+	​
+
++V(t−1,x−1),V(t−1,x)}]
+
+where the expectation is taken over arrival probabilities.
+
+Bid Price Definition
+
+The bid price (marginal seat value) is defined as:
+
+Bid(t,x)=V(t,x)−V(t,x−1)
+
+This represents the opportunity cost of consuming one unit of capacity.
 
 Inputs
-------
-• Total capacity (number of seats)
-• Time horizon (number of periods)
-• Number of fare classes
-• Fare values
-• Arrival probabilities
 
-Output
-------
-• Value function table V(t,x)
-• Bid price table (marginal seat values)
-• Maximum expected revenue
-• Interpretation guidelines
+The program prompts the user to enter:
 
+Total capacity
+Number of time periods
+Number of fare classes
+Fare for each class
+Arrival probability for each class
+
+Constraint:
+
+The sum of arrival probabilities must be ≤ 1.
+
+Outputs
+
+The tool generates:
+
+Value Function Table
+Bid Price Table
+Bid Price Heatmap
+Bid Price Over Time (selected capacity)
+Capacity Comparison Plot
+Forward Monte Carlo Simulation Validation
 How to Run
-----------
-1. Open terminal in this folder.
-2. Run:
+Step 1: Navigate to the project folder
+cd RM_DP_SingleLeg_Project
+Step 2: Create a virtual environment (recommended)
+python3 -m venv venv
+source venv/bin/activate
 
-   python rm_dp_tool.py
+On Windows:
 
-3. Follow the prompts to enter parameters.
+venv\Scripts\activate
+Step 3: Install required packages
+pip install -r requirements.txt
+Step 4: Run the program
+python rm_dp_tool.py
 
-Interpretation
---------------
-Accept a request if fare ≥ bid price.
-Bid prices represent the marginal value of capacity.
+If python does not work, use:
+
+python3 rm_dp_tool.py
+Economic Interpretation
+Lower remaining capacity → higher bid prices
+Earlier periods → higher marginal value of capacity
+Accept only when fare exceeds opportunity cost
+Simulation revenue closely matches DP expected revenue
+
+This aligns with classical airline revenue management theory.
+
+Code Structure
+single_leg_dp() — backward dynamic programming solver
+simulate_policy() — forward simulation validation
+run_model() — user interface and visualization
+main() — menu system
+Dependencies
+numpy
+pandas
+matplotlib
+Author
+
+Lakshanyaa Rajkumar Sudhakar
+CMOR 465 / INDE 565
+Rice University
