@@ -8,7 +8,7 @@ This project implements a discrete-time, single-leg revenue management model usi
 
 The tool computes:
 
-The value function V(t,x)
+The value function V(t, x)
 Bid prices (marginal seat values)
 Optimal accept/reject decisions
 Visualizations of pricing dynamics
@@ -34,11 +34,7 @@ Bellman Recursion
 
 The value function satisfies:
 
-V(t,x)=E[max{f
-j
-	​
-
-+V(t−1,x−1),V(t−1,x)}]
+V(t, x) = E[ max{ f_j + V(t-1, x-1), V(t-1, x) } ]
 
 where the expectation is taken over arrival probabilities.
 
@@ -46,7 +42,7 @@ Bid Price Definition
 
 The bid price (marginal seat value) is defined as:
 
-Bid(t,x)=V(t,x)−V(t,x−1)
+Bid(t, x) = V(t, x) − V(t, x-1)
 
 This represents the opportunity cost of consuming one unit of capacity.
 
@@ -74,6 +70,9 @@ Bid Price Heatmap
 Bid Price Over Time (selected capacity)
 Capacity Comparison Plot
 Forward Monte Carlo Simulation Validation
+
+The simulation verifies that average realized revenue converges to the DP expected value.
+
 How to Run
 Step 1: Navigate to the project folder
 cd RM_DP_SingleLeg_Project
@@ -93,10 +92,10 @@ If python does not work, use:
 
 python3 rm_dp_tool.py
 Economic Interpretation
-Lower remaining capacity → higher bid prices
-Earlier periods → higher marginal value of capacity
+Lower remaining capacity leads to higher bid prices
+Bid prices generally decline as departure approaches
 Accept only when fare exceeds opportunity cost
-Simulation revenue closely matches DP expected revenue
+Simulated revenue closely matches DP expected revenue
 
 This aligns with classical airline revenue management theory.
 
