@@ -1,16 +1,22 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import random
+
 plt.ion()
 
 
+# ==========================================================
+# BACKWARD DYNAMIC PROGRAMMING SOLVER
+# ==========================================================
 def single_leg_dp(capacity, T, fares, arrival_probs):
 
     num_classes = len(fares)
 
+    # Value function V(t,x)
     V = np.zeros((T + 1, capacity + 1))
-    policy = np.empty((T + 1, capacity + 1), dtype=object)
 
+    # Backward DP recursion
     for t in range(1, T + 1):
         for x in range(capacity + 1):
 
@@ -30,21 +36,28 @@ def single_leg_dp(capacity, T, fares, arrival_probs):
                 best_value = max(accept_value, reject_value)
                 expected_value += p * best_value
 
+            # No-arrival probability
             p_no_arrival = 1 - sum(arrival_probs)
             expected_value += p_no_arrival * V[t - 1][x]
 
             V[t][x] = expected_value
 
+    # ======================================================
+    # Correct Bid Price Definition:
+    # Bid(t,x) = V(t,x) - V(t,x-1)
+    # ======================================================
     bid_prices = np.zeros((T + 1, capacity + 1))
 
     for t in range(1, T + 1):
         for x in range(1, capacity + 1):
-            bid_prices[t][x] = V[t - 1][x] - V[t - 1][x - 1]
+            bid_prices[t][x] = V[t][x] - V[t][x - 1]
 
     return V, bid_prices
 
-import random
 
+# ==========================================================
+# FORWARD SIMULATION (VALIDATION)
+# ==========================================================
 def simulate_policy(capacity, T, fares, arrival_probs, bid_prices, runs=1000):
 
     total_revenue = 0
@@ -71,7 +84,7 @@ def simulate_policy(capacity, T, fares, arrival_probs, bid_prices, runs=1000):
                     break
 
             if arrival_class is None:
-                continue  # no arrival
+                continue
 
             fare = fares[arrival_class]
             bid = bid_prices[t][seats]
@@ -84,6 +97,10 @@ def simulate_policy(capacity, T, fares, arrival_probs, bid_prices, runs=1000):
 
     return total_revenue / runs
 
+
+# ==========================================================
+# USER INTERFACE + VISUALIZATION
+# ==========================================================
 def run_model():
 
     print("\n--- Single-Leg Revenue Management DP Tool ---\n")
@@ -109,61 +126,66 @@ def run_model():
 
     print("\n--- RESULTS ---\n")
 
-    V_df = pd.DataFrame(V)
-    bid_df = pd.DataFrame(bid_prices)
-
     print("Value Function V(t,x):")
-    print(V_df.round(2))
+    print(pd.DataFrame(V).round(2))
+
     print("\nBid Prices (Marginal Seat Values):")
-    print(bid_df.round(2))
-    
-    plt.figure(1)
+    print(pd.DataFrame(bid_prices).round(2))
+
+    # ======================================================
+    # Heatmap
+    # ======================================================
+    plt.figure()
     plt.imshow(bid_prices, cmap="Blues", aspect="auto")
     plt.colorbar(label="Bid Price")
     plt.title("Bid Price Heatmap")
     plt.xlabel("Capacity")
     plt.ylabel("Time")
+    plt.tight_layout()
     plt.show()
 
-    avg_simulated_revenue = simulate_policy(
-    capacity, T, fares, arrival_probs, bid_prices
-)
+    # ======================================================
+    # Bid Price Over Time (Selected Capacity)
+    # ======================================================
+    plt.figure()
 
-    print("\n--- FORWARD SIMULATION ---")
-    print("Average simulated revenue over 1000 runs:",
-    round(avg_simulated_revenue, 2))
-
-    # ---- Bid Price Over Time Plot ----
-
-    plt.figure(2)
-
-# Choose capacity level to visualize (e.g., full capacity)
     cap_to_plot = capacity
+    time_axis = range(T + 1)
 
-    time_axis = list(range(len(bid_prices)))[::-1]
-    plt.plot(time_axis, bid_prices[:, cap_to_plot][::-1], marker='o')
-
+    plt.plot(time_axis, bid_prices[:, cap_to_plot], marker='o')
     plt.title(f"Bid Price Over Time (Capacity = {cap_to_plot})")
-    plt.xlabel("Time")
+    plt.xlabel("Time Period")
     plt.ylabel("Bid Price")
     plt.grid(True)
-
+    plt.tight_layout()
     plt.show()
 
-    # ---- Capacity Comparison Plot ----
-
-    plt.figure(3)
+    # ======================================================
+    # Capacity Comparison Plot
+    # ======================================================
+    plt.figure()
 
     for x in range(1, capacity + 1):
-        plt.plot(range(len(bid_prices)), bid_prices[:, x], label=f"Capacity {x}")
+        plt.plot(range(T + 1), bid_prices[:, x], label=f"Capacity {x}")
 
     plt.title("Bid Price Over Time (All Capacity Levels)")
-    plt.xlabel("Time")
+    plt.xlabel("Time Period")
     plt.ylabel("Bid Price")
     plt.legend()
     plt.grid(True)
-
+    plt.tight_layout()
     plt.show()
+
+    # ======================================================
+    # Forward Simulation
+    # ======================================================
+    avg_simulated_revenue = simulate_policy(
+        capacity, T, fares, arrival_probs, bid_prices
+    )
+
+    print("\n--- FORWARD SIMULATION ---")
+    print("Average simulated revenue over 1000 runs:",
+          round(avg_simulated_revenue, 2))
 
     print("\n--- INTERPRETATION ---")
     print("• Accept a request if fare ≥ bid price.")
@@ -174,6 +196,9 @@ def run_model():
           round(V[T][capacity], 2))
 
 
+# ==========================================================
+# MAIN MENU
+# ==========================================================
 def main():
 
     while True:
