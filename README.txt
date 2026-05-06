@@ -177,6 +177,18 @@ python rm_dp_tool.py
 If python does not work, use:
 
 python3 rm_dp_tool.py
+
+Example Scenario (Used for Testing)
+
+Capacity = 5
+Time Periods = 5
+Fares = [150, 80]
+Arrival Probabilities = [0.3, 0.5]
+
+DP Expected Revenue (V[T][C]) ≈ 425
+Average Simulated Revenue ≈ 423–427 (over 1000 runs)
+
+
 Economic Interpretation
 Lower remaining capacity leads to higher bid prices
 Bid prices generally decline as departure approaches
